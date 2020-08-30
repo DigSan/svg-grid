@@ -1,0 +1,14 @@
+.chart {
+    width: 100%;
+    height: 100%;
+    background: gray;
+
+
+}
+
+.grid-bacground {
+    width: 100%;
+    height: 100%;
+}
+
+.text {font: italic 2px sans-serif;} 
