@@ -1,68 +1,82 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styles from './Chart.module.css';
-import { fromEvent, Subject, of, Observable } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { switchMap, takeUntil } from 'rxjs/operators';
 
-interface Point { x: number, y: number };
-interface ChartState { zoom: number, position: Point }
+export interface Point { x: number, y: number };
+export interface ChartParams { rotation: number };
+export interface ChartState { zoom: number, position: Point, rotation: number }
+export interface ZoomParams { zoom?: number }
 
-export class Chart extends React.Component<{}, ChartState> {
-    mouseUpDown = new Subject<number>();
+export class Chart extends React.Component<ChartParams, ChartState> {
+    mouseUp = new Subject();
+    mouseLeave = new Subject();
+
+    mouseDown = new Subject();
+    wheelMoves = new Subject<React.WheelEvent<HTMLDivElement>>();
+    destroy = new Subject();
+
     mouseMove = new Subject<Point>();
-    testChart: Point[] = [
-        { x: 10, y: 20 },
-        { x: 20, y: 25 },
-        { x: 30, y: 15 },
-        { x: 35, y: 15 },
-        { x: 45, y: 5 }
-    ]
+
     constructor(props: any) {
         super(props);
 
-        this.state = { zoom: 1, position: { x: 0, y: 0 } };
+        this.state = { zoom: 1, position: { x: 0, y: 0 }, rotation: 0 };
+    }
 
-        this.mouseUpDown.pipe(
-            switchMap(x => x === 1 ? this.mouseMove : new Subject<Point>()))
+    componentDidMount() {
+        this.mouseDown.pipe(
+            switchMap(() => this.mouseMove.pipe(takeUntil(this.mouseUp), takeUntil(this.mouseLeave))),
+            takeUntil(this.destroy))
             .subscribe(x => {
-                this.setState({ zoom: this.state.zoom, position: { x: this.state.position.x + x.x, y: this.state.position.y + x.y } });
+                this.setState({
+                    zoom: this.state.zoom,
+                    position: {
+                        x: this.state.position.x + x.x,
+                        y: this.state.position.y + x.y
+                    }
+                });
+            });
+
+        this.wheelMoves.pipe(takeUntil(this.destroy))
+            .subscribe(e => {
+                var viewBounds = e.currentTarget.getBoundingClientRect();
+                var mousePosition = {
+                    x: e.clientX - viewBounds.x,
+                    y: e.clientY - viewBounds.y
+                };
+                console.log(mousePosition);
+                this.setState({ zoom: this.state.zoom - e.deltaY / 1000 })
             });
     }
 
+    componentWillUnmount() {
+        this.destroy.next();
+        this.destroy.complete();
+    }
+
     render() {
-        const baseWidth = 1500;
-        const baseHieght = 500;
+        const zoomedChildren = React.Children.map(this.props.children, child => {
 
-
-        const t2 = this.testChart.map((e) => `${e.x},${e.y}`).join(' ');
-
-        const maxX = Math.max(...this.testChart.map(x => x.x));
-        const maxY = Math.max(...this.testChart.map(x => x.y));
-        const minX = Math.min(...this.testChart.map(x => x.x));
-        const minY = Math.min(...this.testChart.map(x => x.y));
-
-        const width = maxX / (Math.abs(this.state.zoom) + 1);
-        const hieght = maxY / (Math.abs(this.state.zoom) + 1);
-
-        const zoom = 1 / Math.pow(this.state.zoom, 2);
-
-        const viewBox = `${-this.state.position.x * zoom} ${-this.state.position.y * zoom} ${baseWidth * zoom} ${baseHieght * zoom}`;
-
-        const divStyle = {
-            font: `italic ${(14 * (Math.abs(zoom) ))}px sans-serif`
-        };
-
-        const t1 = this.testChart.map(e => <text style={divStyle} x={e.x} y={e.y}>{zoom.toFixed(2)}</text>)
+            const props = { zoom: this.state.zoom, position: this.state.position };
+            if (React.isValidElement(child)) {
+                return React.cloneElement(child, props);
+            }
+            return child;
+        });
 
         return (
-            <div className={styles.chart} onWheel={(e) => this.setState({ zoom: this.state.zoom - e.deltaY / 1000 })}
-                onMouseDown={() => this.mouseUpDown.next(1)}
-                onMouseUp={() => this.mouseUpDown.next(2)}
-                onMouseMove={e => this.mouseMove.next({ x: e.movementX, y: e.movementY })}
-            >
-                <svg width={baseWidth} height={baseHieght} viewBox={viewBox}>
-                    <polyline points={t2} vectorEffect="non-scaling-stroke" fill="none" stroke="white" strokeWidth="1px" />
-                    {t1}
-                </svg>
+            <div className={styles.chart} onWheel={(e) => this.wheelMoves.next(e)}
+                onMouseDown={(e) => { this.mouseDown.next(); e.stopPropagation() }}
+                onMouseUp={() => this.mouseUp.next()}
+                onMouseLeave={() => this.mouseUp.next()}
+
+                onMouseMove={e => this.mouseMove.next({ x: e.movementX, y: e.movementY })}>
+                {zoomedChildren}
+                {/* <svg className={styles.background}>
+
+                </svg> */}
+
             </div>
         );
     }
