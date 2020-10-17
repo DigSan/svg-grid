@@ -16,10 +16,11 @@ export class ScalableText extends React.Component<Point & ZoomParams> {
         else
             zoom = this.props.zoom
             
-        const divStyle = {
-            font: `italic ${(14 * (Math.abs(zoom)))}px sans-serif`
+        const divStyle: React.CSSProperties = {
+            font: `italic ${(14 * (Math.abs(zoom)))}px sans-serif`,
+            color: "white"
         };
 
-        return (<text style={divStyle} x={this.props.x} y={this.props.y}>{zoom.toFixed(2)}</text>);
+        return (<text style={divStyle} x={this.props.x} y={this.props.y}>{(-this.props.y).toFixed(2)}</text>);
     }
 }

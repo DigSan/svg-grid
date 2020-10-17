@@ -46,7 +46,7 @@ export class Chart extends React.Component<ChartParams, ChartState> {
                     y: e.clientY - viewBounds.y
                 };
                 console.log(mousePosition);
-                this.setState({ zoom: this.state.zoom - e.deltaY / 1000 })
+                this.setState({ zoom: this.state.zoom + e.deltaY / 1000 * this.state.zoom })
             });
     }
 

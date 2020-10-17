@@ -36,8 +36,8 @@ function App() {
               {/* {gantData.map((x, i) => <rect x={15 * i} y={10} height={10 * x} width={10} fill='green'> </rect>)} */}
               {/* <circle cx="90" cy="90" r="30"></circle>
               <ScalableCircle x={190} y={190} /> */}
-              <polyline points={data.map((e) => `${e.x},${e.y}`).join(' ')} vectorEffect="non-scaling-stroke" fill="none" stroke="white" strokeWidth="1px" />
-              {data.map(point => <ScalableText x={point.x} y={point.y} />)}
+              <polyline points={data.map((e) => `${e.x},${-e.y}`).join(' ')} vectorEffect="non-scaling-stroke" fill="none" stroke="white" strokeWidth="1px" />
+              {data.map(point => <ScalableText x={point.x} y={-point.y} />)}
 
             </AutoScroll>
           </Chart>
