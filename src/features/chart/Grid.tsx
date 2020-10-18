@@ -10,6 +10,8 @@ export class Grid extends React.Component<GridProps> {
         const baseWidth = 1500;
         const baseHieght = 500;
 
+        const hieght = 40;
+
         let zoom: number;
         if (!this.props.zoom)
             zoom = 1;
@@ -28,10 +30,9 @@ export class Grid extends React.Component<GridProps> {
 
         const viewBoxRight = `${0} ${-position.y} ${60} ${baseHieght}`;
 
-        const viewBoxBottom = `${-position.x} ${-25} ${baseWidth} ${60}`;
+        const viewBoxBottom = `${-position.x} ${-25} ${baseWidth} ${hieght}`;
 
         let lines = Array(80).fill(1).map((element, index) => index - 25)
-        console.log(lines);
         return (
             <div>
                 <svg className={styles.background} width={baseWidth} height={baseHieght} viewBox={viewBox}>
@@ -41,14 +42,14 @@ export class Grid extends React.Component<GridProps> {
                         fill="none" stroke="white" strokeWidth="0.5px" x1={x * size / zoom} x2={x * size / zoom} y1={-10000} y2={10000}></line>)}
                 </svg>
 
-                <svg style={{ right: 0, top: 0, position: "absolute", background: "red" }} width={60} height={baseHieght} viewBox={viewBoxRight}>
-                    {lines.map(x => <text vectorEffect="non-scaling-stroke"
-                        fill="none" stroke="white" strokeWidth="0.2px" y={x * size / zoom} x={0}>{(-x * size).toFixed(2)}</text>)}
+                <svg style={{ right: 0, top: 0, position: "absolute", background: "#444444" }} width={60} height={baseHieght} viewBox={viewBoxRight}>
+                    {lines.map(x => <text fontFamily= 'italic'
+                        fill="white" y={x * size / zoom} x={0}>{(-x * size).toFixed(2)}</text>)}
                 </svg>
 
-                <svg style={{ left:0, bottom: 0, width: '100%', position: "absolute", background: "red" }} width={baseWidth} height={60} viewBox={viewBoxBottom}>
-                    {lines.map(x => <text vectorEffect="non-scaling-stroke"
-                        fill="none" stroke="white" strokeWidth="0.2px" x={x * size / zoom} y={0}>{(x * size).toFixed(2)}</text>)}
+                <svg style={{ left:0, bottom: 0, width: '100%', position: "absolute", background: "#444444" }} width={baseWidth} height={hieght} viewBox={viewBoxBottom}>
+                    {lines.map(x => <text fontFamily= 'sans-serif'
+                        fill="white" x={x * size / zoom} y={0}>{(x * size).toFixed(2)}</text>)}
                 </svg>
             </div>
         );

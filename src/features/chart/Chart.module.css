@@ -9,7 +9,7 @@
 
 .background {
     position: absolute;
-    background: #991111dd;
+    background: 'gray';
     width: 100%;
     height: 100%;
     left: 0;

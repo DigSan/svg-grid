@@ -11,7 +11,6 @@ export interface ZoomParams { zoom?: number }
 export class Chart extends React.Component<ChartParams, ChartState> {
     mouseUp = new Subject();
     mouseLeave = new Subject();
-
     mouseDown = new Subject();
     wheelMoves = new Subject<React.WheelEvent<HTMLDivElement>>();
     destroy = new Subject();
@@ -45,8 +44,11 @@ export class Chart extends React.Component<ChartParams, ChartState> {
                     x: e.clientX - viewBounds.x,
                     y: e.clientY - viewBounds.y
                 };
-                console.log(mousePosition);
-                this.setState({ zoom: this.state.zoom + e.deltaY / 1000 * this.state.zoom })
+
+                this.setState({
+                    zoom: this.state.zoom + e.deltaY / 1000 * this.state.zoom,
+                    position: { x: this.state.position.x, y: this.state.position.y }
+                });
             });
     }
 
